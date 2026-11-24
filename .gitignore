@@ -1,0 +1,23 @@
+node_modules/
+lib/
+*.tgz
+.DS_Store
+*.log
+
+# Generated native projects (Expo CNG) and build output
+apps/*/ios/
+apps/*/android/
+apps/*/.expo/
+apps/*/dist/
+build/
+.gradle/
+.cxx/
+
+# Asset-pack build output
+*.aar
+asset-packs-out/
+
+# Local credentials
+*.p8
+.env
+.env.*

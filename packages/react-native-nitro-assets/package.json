@@ -1,0 +1,142 @@
+{
+  "name": "react-native-nitro-assets",
+  "version": "0.0.0",
+  "description": "Deliver large files (ML models, media) to React Native apps: Apple-hosted Background Assets on iOS 26+, On-Demand Resources below, Google Play Asset Delivery on Android, behind one API, with an Expo config plugin and pack tooling.",
+  "license": "MIT",
+  "author": "gugell",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gugell/react-native-nitro-assets.git",
+    "directory": "packages/react-native-nitro-assets"
+  },
+  "homepage": "https://github.com/gugell/react-native-nitro-assets#readme",
+  "bugs": "https://github.com/gugell/react-native-nitro-assets/issues",
+  "keywords": [
+    "react-native",
+    "nitro-modules",
+    "background-assets",
+    "asset-packs",
+    "on-demand-resources",
+    "play-asset-delivery",
+    "ml-models",
+    "ios",
+    "android",
+    "expo",
+    "expo-config-plugin"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "main": "./lib/index.js",
+  "module": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "react-native": "src/index",
+  "source": "src/index",
+  "bin": {
+    "nitro-assets": "./bin/nitro-assets.mjs"
+  },
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "react-native": "./src/index.ts",
+      "import": "./lib/index.js",
+      "default": "./lib/index.js"
+    },
+    "./native": {
+      "types": "./lib/native.d.ts",
+      "react-native": "./src/native.ts",
+      "browser": "./lib/native.web.js",
+      "import": "./lib/native.js",
+      "default": "./lib/native.js"
+    },
+    "./memory": {
+      "types": "./lib/memory.d.ts",
+      "react-native": "./src/memory.ts",
+      "import": "./lib/memory.js",
+      "default": "./lib/memory.js"
+    },
+    "./app.plugin": "./app.plugin.cjs",
+    "./app.plugin.js": "./app.plugin.cjs",
+    "./app.plugin.cjs": "./app.plugin.cjs",
+    "./plugin": {
+      "types": "./plugin/props.d.cts",
+      "default": "./app.plugin.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "lib",
+    "nitrogen",
+    "nitro.json",
+    "react-native.config.js",
+    "app.plugin.cjs",
+    "plugin",
+    "bin",
+    "ios/**/*.swift",
+    "android/build.gradle",
+    "android/gradle.properties",
+    "android/fix-prefab.gradle",
+    "android/CMakeLists.txt",
+    "android/src",
+    "*.podspec",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "specs": "nitrogen --logLevel=\"warning\"",
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "prepack": "bun run build",
+    "release": "release-it"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
+  "peerDependencies": {
+    "expo": ">=52.0.0",
+    "react-native": ">=0.78.0",
+    "react-native-nitro-modules": ">=0.37.2 <0.38.0"
+  },
+  "peerDependenciesMeta": {
+    "expo": {
+      "optional": true
+    },
+    "react-native-nitro-modules": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "expo": "~58.0.26",
+    "nitrogen": "0.37.2",
+    "react-native-nitro-modules": "0.37.2",
+    "release-it": "21.1.3",
+    "typescript": "~6.0.3",
+    "vitest": "5.1.1"
+  },
+  "release-it": {
+    "npm": {
+      "publish": true,
+      "publishArgs": [
+        "--access",
+        "public"
+      ],
+      "publishPath": "package.tgz"
+    },
+    "git": {
+      "requireBranch": "main",
+      "commitMessage": "chore: release v${version}",
+      "tagName": "v${version}"
+    },
+    "github": {
+      "release": true,
+      "releaseName": "v${version}"
+    },
+    "hooks": {
+      "before:init": "bun run --cwd ../.. check",
+      "after:bump": "bun run build && npm pack && mv react-native-nitro-assets-${version}.tgz package.tgz"
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "name": "react-native-nitro-assets-repo",
+  "private": true,
+  "version": "0.0.0",
+  "packageManager": "bun@1.4.5",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "specs": "bun --cwd packages/react-native-nitro-assets run specs",
+    "build": "bun --cwd packages/react-native-nitro-assets run build",
+    "typecheck": "bun --cwd packages/react-native-nitro-assets run typecheck && bun --cwd apps/example run typecheck",
+    "test": "bun --cwd packages/react-native-nitro-assets run test",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "generated:check": "node scripts/check-generated.mjs",
+    "pack:check": "node scripts/pack-check.mjs",
+    "check": "bun run build && bun run typecheck && bun run lint && bun run format:check && bun run test",
+    "example": "bun --cwd apps/example",
+    "release": "bun --cwd packages/react-native-nitro-assets run release"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.5",
+    "eslint": "9.39.5",
+    "prettier": "3.9.10",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.71.1"
+  }
+}

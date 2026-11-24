@@ -1,0 +1,10 @@
+node_modules
+lib
+nitrogen/generated
+packages/*/nitrogen
+apps/*/ios
+apps/*/android
+.claude
+skills-lock.json
+bun.lock
+*.md
