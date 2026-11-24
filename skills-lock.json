@@ -1,0 +1,45 @@
+{
+  "version": 2,
+  "skills": {
+    "api-design": {
+      "source": "margelo/react-native-skills",
+      "commit": "1e9e17be6f41c838db472d6a4b943fc26355a3be",
+      "sourceType": "github",
+      "skillPath": "skills/api-design/SKILL.md",
+      "computedHash": "ce545557ddc18c7e0f26dd2f2551465c413f8b441f9980a7ef01e59ae63fb4f2",
+      "installMode": "copy"
+    },
+    "build-nitro-modules": {
+      "source": "margelo/react-native-skills",
+      "commit": "1e9e17be6f41c838db472d6a4b943fc26355a3be",
+      "sourceType": "github",
+      "skillPath": "skills/build-nitro-modules/SKILL.md",
+      "computedHash": "2854c0e45d2a631804e87acda26d6d87dcfacb0c8a8c98fe70240de94333ac92",
+      "installMode": "copy"
+    },
+    "cpp": {
+      "source": "margelo/react-native-skills",
+      "commit": "1e9e17be6f41c838db472d6a4b943fc26355a3be",
+      "sourceType": "github",
+      "skillPath": "skills/cpp/SKILL.md",
+      "computedHash": "6ec23c4c6973080687b0834a1b194695482eb0081b25cd66529d37422f150c3e",
+      "installMode": "copy"
+    },
+    "kotlin": {
+      "source": "margelo/react-native-skills",
+      "commit": "1e9e17be6f41c838db472d6a4b943fc26355a3be",
+      "sourceType": "github",
+      "skillPath": "skills/kotlin/SKILL.md",
+      "computedHash": "5daa69290b663bb007f6c8d56698902410ab4cf86fddc14b08bdd8f95e252736",
+      "installMode": "copy"
+    },
+    "swift": {
+      "source": "margelo/react-native-skills",
+      "commit": "1e9e17be6f41c838db472d6a4b943fc26355a3be",
+      "sourceType": "github",
+      "skillPath": "skills/swift/SKILL.md",
+      "computedHash": "64ed9c39f099ff4cb055dc1bb568d88b172d67f1a6135aaa2b1f677e392efc78",
+      "installMode": "copy"
+    }
+  }
+}
