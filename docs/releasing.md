@@ -40,8 +40,19 @@ Then, on `https://www.npmjs.com/package/react-native-nitro-assets/access`, "Requ
 
 ## Later versions: the Release workflow
 
-Actions → Release → Run workflow, on `main`. Inputs: `increment` (`auto` reads the conventional commits; or `patch`, `minor`, `major`) and `prerelease` (`none`, or `alpha`, `beta`, `rc` to publish under that dist-tag; running it again advances `alpha.0` to `alpha.1`).
+Actions → Release → Run workflow, on `main`. This is the same workflow as expo-native-config, whose first versions were published by hand and every version since 0.3.0 by this workflow, with provenance.
 
-The job publishes through npm trusted publishing: `id-token: write`, environment `npm`, npm 11. There is no npm token anywhere. Provenance is attached because `repository` in the package's `package.json` matches this repository.
+| Input        | Options                                      | Meaning                                                                                                                                  |
+| ------------ | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `increment`  | `auto`, `patch` (default), `minor`, `major`, `initial` | `auto` passes no increment and lets the conventional commits decide; `initial` publishes the version already in the manifest |
+| `prerelease` | `none`, `alpha`, `beta`, `rc`                | Adds `--preRelease=<id>` and publishes under that dist-tag; running it again advances `alpha.0` to `alpha.1`                             |
 
-`npm error need auth` in the workflow means the trusted publisher is missing or does not match (repository, `release.yml`, environment `npm`).
+`initial` with a prerelease is rejected before anything runs. `bun run release:check` runs `scripts/release.sh` on every path with a stubbed release-it (empty and populated flag lists, `--no-increment`, an explicit increment, a prerelease reaching both passes); CI runs it.
+
+The job runs `generated:check`, `check` and `pack:check`, then releases through npm trusted publishing: `id-token: write`, the `npm` environment (already created in the repository, with no protection rules, as in expo-native-config), and npm 11. There is no npm token anywhere. Provenance is attached because `repository` in the package's `package.json` matches this repository exactly.
+
+Failure modes:
+
+- **`npm error 404 Not Found - PUT https://registry.npmjs.org/react-native-nitro-assets`**: the trusted publisher is missing or does not match (owner `gugell`, repository `react-native-nitro-assets`, workflow `release.yml`, environment `npm`). npm reports this as 404, not as an auth error; expo-native-config's first two workflow runs failed exactly this way.
+- **`npm error need auth`**: the same cause on older npm versions.
+- **Published without a provenance badge**: check the `repository` field; if it matches, add `--provenance` to `publishArgs`.

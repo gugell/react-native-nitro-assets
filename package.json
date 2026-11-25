@@ -21,6 +21,7 @@
     "example": "bun run --cwd apps/example",
     "release": "bash ./scripts/release.sh",
     "release:dry-run": "bash ./scripts/release.sh --dry-run",
+    "release:check": "bash ./scripts/check-release-script.sh",
     "release:first": "bash ./scripts/first-publish.sh"
   },
   "devDependencies": {

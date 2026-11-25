@@ -15,7 +15,8 @@ set -euo pipefail
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$root"
-release_it="$root/node_modules/.bin/release-it"
+# RELEASE_IT lets scripts/check-release-script.sh run this with a stub.
+release_it="${RELEASE_IT:-$root/node_modules/.bin/release-it}"
 
 dry_run=false
 for argument in "$@"; do

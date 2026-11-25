@@ -3,10 +3,10 @@ on:
   workflow_dispatch:
     inputs:
       increment:
-        description: Version increment (auto reads the conventional commits)
+        description: Version increment (auto reads conventional commits; initial only for the first release)
         type: choice
-        default: auto
-        options: [auto, patch, minor, major]
+        default: patch
+        options: [auto, patch, minor, major, initial]
       prerelease:
         description: Publish a prerelease under this dist-tag instead of latest
         type: choice
@@ -42,6 +42,7 @@ jobs:
         run: npm install --global npm@11
       - run: bun install --frozen-lockfile
       - run: bun run generated:check
+      - run: bun run check
       - run: bun run pack:check
       - name: Configure release author
         run: |
@@ -55,12 +56,21 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          arguments=()
-          # No positional increment for "auto": release-it reads the conventional
-          # commits, and advances an existing prerelease (alpha.0 -> alpha.1).
-          if [ "$RELEASE_INCREMENT" != auto ]; then
-            arguments+=("$RELEASE_INCREMENT")
+          # "initial" publishes the version already in the manifest, so there is
+          # no increment to qualify with a prerelease id.
+          if [ "$RELEASE_INCREMENT" = initial ] && [ "$RELEASE_PRERELEASE" != none ]; then
+            echo "error: 'initial' cannot be combined with a prerelease channel." >&2
+            exit 1
           fi
+          arguments=()
+          case "$RELEASE_INCREMENT" in
+          # No positional increment: release-it takes the bump from the
+          # conventional commits, and from the current prerelease when there is
+          # one, which is what makes alpha.0 advance to alpha.1 on a re-run.
+          auto) ;;
+          initial) arguments+=(--no-increment) ;;
+          *) arguments+=("$RELEASE_INCREMENT") ;;
+          esac
           if [ "$RELEASE_PRERELEASE" != none ]; then
             arguments+=("--preRelease=$RELEASE_PRERELEASE")
           fi
