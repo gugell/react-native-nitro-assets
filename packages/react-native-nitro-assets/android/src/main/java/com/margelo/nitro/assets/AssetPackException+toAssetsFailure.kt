@@ -11,7 +11,6 @@ internal fun AssetsFailure.Companion.fromPlayErrorCode(errorCode: Int, packId: S
     AssetPackErrorCode.APP_UNAVAILABLE,
     AssetPackErrorCode.APP_NOT_OWNED,
     AssetPackErrorCode.UNRECOGNIZED_INSTALLATION,
-    AssetPackErrorCode.PLAY_STORE_NOT_FOUND,
     AssetPackErrorCode.API_NOT_AVAILABLE ->
       AssetsFailure(
         AssetsFailureCode.STORE_UNAVAILABLE,
