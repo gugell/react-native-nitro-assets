@@ -1,5 +1,7 @@
 # react-native-nitro-assets
 
+![Demo: configure a pack, build it with nitro-assets package, deliver it per platform, and the device tests passing on an iPhone 13 Pro Max](https://raw.githubusercontent.com/gugell/react-native-nitro-assets/main/docs/demo/demo.gif)
+
 Deliver large files — ML models, media, game data — to a React Native app without putting them in the app binary. One API over each platform's own delivery system:
 
 | Platform     | Backend                                                                                                                     | When                                                   |
