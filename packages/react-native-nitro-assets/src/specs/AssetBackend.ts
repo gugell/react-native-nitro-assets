@@ -11,8 +11,4 @@
  * @see {@linkcode AssetsAdapter.backend}
  */
 export type AssetBackend =
-  | 'background-assets'
-  | 'on-demand-resources'
-  | 'play-asset-delivery'
-  | 'memory'
-  | 'none';
+  'background-assets' | 'on-demand-resources' | 'play-asset-delivery' | 'memory' | 'none';

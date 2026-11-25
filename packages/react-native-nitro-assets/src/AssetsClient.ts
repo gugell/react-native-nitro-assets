@@ -19,7 +19,7 @@ import type { AssetPackStatus } from './specs/AssetPackStatus.ts';
  */
 export interface AssetsClient {
   /** The adapter's name, for example `native` or `memory`. @see {@linkcode AssetsAdapter.name} */
-  readonly adapter: string;
+  readonly adapter: AssetsAdapter['name'];
   /** The system that delivers packs on this device. @see {@linkcode AssetBackend} */
   readonly backend: AssetBackend;
   /**

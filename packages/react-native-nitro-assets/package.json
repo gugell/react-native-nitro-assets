@@ -61,7 +61,8 @@
       "types": "./plugin/props.d.cts",
       "default": "./app.plugin.cjs"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./downloader/package.json": "./downloader/package.json"
   },
   "files": [
     "src",
@@ -71,6 +72,7 @@
     "react-native.config.js",
     "app.plugin.cjs",
     "plugin",
+    "downloader",
     "bin",
     "ios/**/*.swift",
     "android/build.gradle",
@@ -87,8 +89,7 @@
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "prepack": "bun run build",
-    "release": "release-it"
+    "prepack": "bun run build"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
@@ -125,14 +126,9 @@
       ],
       "publishPath": "package.tgz"
     },
-    "git": {
-      "requireBranch": "main",
-      "commitMessage": "chore: release v${version}",
-      "tagName": "v${version}"
-    },
+    "git": false,
     "github": {
-      "release": true,
-      "releaseName": "v${version}"
+      "release": false
     },
     "hooks": {
       "before:init": "bun run --cwd ../.. check",

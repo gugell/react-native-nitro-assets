@@ -89,9 +89,13 @@ export function createMemoryAdapter(options: MemoryAdapterOptions): AssetsAdapte
         for (let step = 1; step <= steps; step++) {
           await new Promise<void>((resolve) => setTimeout(resolve, stepMs));
           if (pack.failDownloadWith && step === steps / 2)
-            throw new AssetsError(pack.failDownloadWith, `Simulated failure: ${pack.failDownloadWith}`, {
-              packId,
-            });
+            throw new AssetsError(
+              pack.failDownloadWith,
+              `Simulated failure: ${pack.failDownloadWith}`,
+              {
+                packId,
+              },
+            );
           onProgress?.(step / steps);
         }
         states.set(packId, 'available');
@@ -104,13 +108,21 @@ export function createMemoryAdapter(options: MemoryAdapterOptions): AssetsAdapte
     async getFileUrl(packId, relativePath) {
       const pack = find(packId);
       if (states.get(packId) !== 'available')
-        throw new AssetsError('pack_not_downloaded', `Asset pack "${packId}" is not on the device`, {
-          packId,
-        });
+        throw new AssetsError(
+          'pack_not_downloaded',
+          `Asset pack "${packId}" is not on the device`,
+          {
+            packId,
+          },
+        );
       if (!pack.files.includes(relativePath))
-        throw new AssetsError('file_not_found', `Asset pack "${packId}" has no file "${relativePath}"`, {
-          packId,
-        });
+        throw new AssetsError(
+          'file_not_found',
+          `Asset pack "${packId}" has no file "${relativePath}"`,
+          {
+            packId,
+          },
+        );
       return `${baseUrl}${packId}/${relativePath}`;
     },
 

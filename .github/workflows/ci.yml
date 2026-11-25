@@ -1,0 +1,78 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: bun install --frozen-lockfile
+      - run: bun run generated:check
+      - run: bun run check
+      - run: bun run pack:check
+      - run: bun run release:check
+      - run: bun run release:dry-run
+  ios:
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - run: npx expo prebuild --platform ios --no-install
+        working-directory: apps/example
+      - run: pod install
+        working-directory: apps/example/ios
+        env:
+          LANG: en_US.UTF-8
+          LC_ALL: en_US.UTF-8
+      - name: Build the example for the iOS simulator (no signing)
+        run: |
+          set -o pipefail
+          xcodebuild -workspace apps/example/ios/NitroAssetsExample.xcworkspace \
+            -scheme NitroAssetsExample -configuration Debug -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' -derivedDataPath build/ios \
+            CODE_SIGNING_ALLOWED=NO build | tail -n 200
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - run: npx expo prebuild --platform android --no-install
+        working-directory: apps/example
+      - name: Build the example (Kotlin backends, Nitro C++ library, asset-pack modules)
+        run: ./gradlew :app:assembleDebug -PreactNativeArchitectures=arm64-v8a --console=plain
+        working-directory: apps/example/android
