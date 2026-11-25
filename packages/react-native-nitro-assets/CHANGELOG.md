@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/gugell/react-native-nitro-assets/compare/v0.2.0...v0.2.1) (2026-11-25)
+
+### Documentation
+
+* add the demo video and its renderer ([f97d0f1](https://github.com/gugell/react-native-nitro-assets/commit/f97d0f1f9c6532ec4363dbbdc3cc54e5b19e8d1b))
+* show the demo in the READMEs ([472491e](https://github.com/gugell/react-native-nitro-assets/commit/472491e3176eda1754cedae733b4e2576b30be97))
+
 ## [0.2.0](https://github.com/gugell/react-native-nitro-assets/compare/v0.1.0...v0.2.0) (2026-11-25)
 
 ### Bug Fixes

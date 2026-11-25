@@ -1,6 +1,6 @@
 {
   "name": "react-native-nitro-assets",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Deliver large files (ML models, media) to React Native apps: Apple-hosted Background Assets on iOS 26+, On-Demand Resources below, Google Play Asset Delivery on Android, behind one API, with an Expo config plugin and pack tooling.",
   "license": "MIT",
   "author": "gugell",
