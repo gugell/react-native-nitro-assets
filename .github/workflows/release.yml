@@ -1,0 +1,67 @@
+name: Release
+on:
+  workflow_dispatch:
+    inputs:
+      increment:
+        description: Version increment (auto reads the conventional commits)
+        type: choice
+        default: auto
+        options: [auto, patch, minor, major]
+      prerelease:
+        description: Publish a prerelease under this dist-tag instead of latest
+        type: choice
+        default: none
+        options: [none, alpha, beta, rc]
+permissions:
+  contents: read
+concurrency:
+  group: npm-release
+  cancel-in-progress: false
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    # npm trusts this workflow file in this environment (scripts/first-publish.sh sets it up).
+    environment: npm
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: https://registry.npmjs.org
+      - name: Ensure npm supports trusted publishing
+        run: npm install --global npm@11
+      - run: bun install --frozen-lockfile
+      - run: bun run generated:check
+      - run: bun run pack:check
+      - name: Configure release author
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+      - name: Release with npm trusted publishing
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_INCREMENT: ${{ inputs.increment }}
+          RELEASE_PRERELEASE: ${{ inputs.prerelease }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          arguments=()
+          # No positional increment for "auto": release-it reads the conventional
+          # commits, and advances an existing prerelease (alpha.0 -> alpha.1).
+          if [ "$RELEASE_INCREMENT" != auto ]; then
+            arguments+=("$RELEASE_INCREMENT")
+          fi
+          if [ "$RELEASE_PRERELEASE" != none ]; then
+            arguments+=("--preRelease=$RELEASE_PRERELEASE")
+          fi
+          bun run release ${arguments[@]+"${arguments[@]}"} --ci --npm.skipChecks

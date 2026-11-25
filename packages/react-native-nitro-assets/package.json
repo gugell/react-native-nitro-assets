@@ -89,8 +89,7 @@
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "prepack": "bun run build",
-    "release": "release-it"
+    "prepack": "bun run build"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
@@ -127,14 +126,9 @@
       ],
       "publishPath": "package.tgz"
     },
-    "git": {
-      "requireBranch": "main",
-      "commitMessage": "chore: release v${version}",
-      "tagName": "v${version}"
-    },
+    "git": false,
     "github": {
-      "release": true,
-      "releaseName": "v${version}"
+      "release": false
     },
     "hooks": {
       "before:init": "bun run --cwd ../.. check",
