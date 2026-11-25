@@ -1,9 +1,13 @@
 import Foundation
 import NitroModules
+import os
 
 /// The `AssetPacks` hybrid object: picks the backend once (Background Assets on iOS 26+ when the
-/// app declares Apple-hosted packs, On-Demand Resources when the fallback is enabled) and forwards
+/// app declares Apple-hosted packs and ships what they need, On-Demand Resources when the fallback
+/// is enabled) and forwards
 /// every call to it. Each call crosses into Swift concurrency once, through `Promise.async`.
+private let logger = Logger(subsystem: "react-native-nitro-assets", category: "backend")
+
 final class HybridAssetPacks: HybridAssetPacksSpec {
   private lazy var implementation: any AssetPackBackend = Self.makeBackend()
 
@@ -43,7 +47,16 @@ final class HybridAssetPacks: HybridAssetPacksSpec {
   private static func makeBackend() -> any AssetPackBackend {
     let bundle = Bundle.main
     if #available(iOS 26.0, *), bundle.usesAppleHostedAssetPacks {
-      return BackgroundAssetsBackend()
+      guard let problem = bundle.backgroundAssetsSetupProblem else {
+        return BackgroundAssetsBackend()
+      }
+      // Never touch AssetPackManager here: it would stop the app. Use the fallback when the app
+      // has one, and otherwise make every call fail with a coded error that names the problem.
+      if bundle.usesOnDemandResourcesFallback {
+        logger.error("\(problem, privacy: .public). Using On-Demand Resources instead.")
+        return OnDemandResourcesBackend()
+      }
+      return UnavailableBackend(reason: AssetsFailure(.misconfigured, problem))
     }
     if bundle.usesOnDemandResourcesFallback {
       return OnDemandResourcesBackend()

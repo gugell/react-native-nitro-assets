@@ -13,6 +13,7 @@ actor OnDemandResourcesBackend: AssetPackBackend {
   private var downloading: Set<String> = []
 
   func status(of packId: String) async throws -> AssetPackStatus {
+    try Self.requireKnown(packId)
     if downloading.contains(packId) {
       return AssetPackStatus(packId: packId, state: .downloading, isUpdateAvailable: false, downloadSizeBytes: nil)
     }
@@ -21,6 +22,7 @@ actor OnDemandResourcesBackend: AssetPackBackend {
   }
 
   func ensureAvailable(_ packId: String, requireLatestVersion: Bool, onProgress: (@Sendable (Double) -> Void)?) async throws {
+    try Self.requireKnown(packId)
     if try await accessIfLocal(packId) != nil {
       return
     }
@@ -44,6 +46,7 @@ actor OnDemandResourcesBackend: AssetPackBackend {
   }
 
   func fileUrl(packId: String, relativePath: String) async throws -> String {
+    try Self.requireKnown(packId)
     guard let request = try await accessIfLocal(packId) else {
       throw AssetsFailure(.packNotDownloaded, "Asset pack \"\(packId)\" is not on the device; call ensureAvailable first")
     }
@@ -62,6 +65,25 @@ actor OnDemandResourcesBackend: AssetPackBackend {
   func remove(_ packId: String) async throws {
     accessing.removeValue(forKey: packId)?.endAccessingResources()
     Bundle.main.setPreservationPriority(0, forTags: [packId])
+  }
+
+  /// The tags this build declares, from the OnDemandResources.plist Xcode writes into the app.
+  /// Nil when the app has none, in which case every pack is treated as unknown to this check.
+  private static let knownTags: Set<String>? = {
+    guard let url = Bundle.main.url(forResource: "OnDemandResources", withExtension: "plist"),
+      let manifest = NSDictionary(contentsOf: url) as? [String: Any],
+      let tags = manifest["NSBundleResourceRequestTags"] as? [String: Any]
+    else {
+      return nil
+    }
+    return Set(tags.keys)
+  }()
+
+  /// ODR reports an unknown tag as simply "not local", so check the manifest first.
+  private static func requireKnown(_ packId: String) throws {
+    guard knownTags?.contains(packId) == true else {
+      throw AssetsFailure(.packNotFound, "This build has no On-Demand Resources pack \"\(packId)\": add it to ios.odr.packs in the config plugin and rebuild")
+    }
   }
 
   /// The accessing request of a pack that is already on the device, or nil when it is not.
