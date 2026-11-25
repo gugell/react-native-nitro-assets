@@ -26,7 +26,8 @@ for arg in "\$@"; do
       --preRelease=*) echo "9.9.9-\${other#--preRelease=}.0"; exit 0 ;;
       esac
     done
-    echo "9.9.9"
+    # STUB_VERSION= (empty) stands for "no releasable commits since the tag".
+    echo "\${STUB_VERSION-9.9.9}"
     exit 0
     ;;
   esac
@@ -89,5 +90,28 @@ if [ "$(calls | grep -c -- "--preRelease=alpha")" -ne 2 ] || [ "$(calls | grep -
   exit 1
 fi
 echo "    and forwarded the prerelease to both passes"
+
+# Nothing releasable since the last tag (right after a release, or after only
+# chore/docs commits): the rehearsal reports it and passes, a release refuses.
+: > "$stub/calls"
+if ! output="$(STUB_VERSION= RELEASE_IT="$stub/release-it" bash "$root/scripts/release.sh" --dry-run 2>&1)"; then
+  echo "release.sh --dry-run failed with nothing to release:" >&2
+  echo "$output" >&2
+  exit 1
+fi
+case "$output" in *"Nothing to release"*) ;; *) echo "release.sh --dry-run did not say there is nothing to release:" >&2; echo "$output" >&2; exit 1 ;; esac
+if [ -s "$stub/calls" ]; then
+  echo "release.sh --dry-run ran a release pass with nothing to release:" >&2
+  calls >&2
+  exit 1
+fi
+echo "  nothing-to-release rehearsal ok"
+if output="$(STUB_VERSION= RELEASE_IT="$stub/release-it" GITHUB_TOKEN=stub bash "$root/scripts/release.sh" 2>&1)"; then
+  echo "release.sh released with nothing to release:" >&2
+  echo "$output" >&2
+  exit 1
+fi
+case "$output" in *"nothing to release"*) ;; *) echo "release.sh failed without saying there is nothing to release:" >&2; echo "$output" >&2; exit 1 ;; esac
+echo "  nothing-to-release release refused"
 
 echo "release.sh runs on every path."

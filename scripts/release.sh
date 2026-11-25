@@ -74,7 +74,16 @@ if ! version="$("$release_it" --release-version "$@" ${offline[@]+"${offline[@]}
 fi
 rm -f "$version_log"
 version="$(printf '%s\n' "$version" | tail -1)"
-[ -n "$version" ] || { echo "error: release-it did not report a version." >&2; exit 1; }
+# release-it reports no version when the conventional commits since the last
+# tag recommend no bump: none yet, or only chore/docs/style ones.
+if [ -z "$version" ]; then
+  if [ "$dry_run" = true ]; then
+    echo "Nothing to release: no feat or fix commits since the last tag. Pass an increment (e.g. patch) to rehearse one anyway."
+    exit 0
+  fi
+  echo "error: nothing to release: no feat or fix commits since the last tag. Pass an increment (patch, minor, major) to release anyway." >&2
+  exit 1
+fi
 echo "Releasing version $version"
 
 # With --no-increment, passing the version positionally as well would make
