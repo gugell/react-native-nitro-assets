@@ -1,0 +1,6 @@
+{
+  "name": "react-native-nitro-assets-downloader",
+  "private": true,
+  "description": "The Background Assets downloader extension of react-native-nitro-assets, linked by expo-native-config: { package: 'react-native-nitro-assets/downloader' }.",
+  "main": "target.config.js"
+}
