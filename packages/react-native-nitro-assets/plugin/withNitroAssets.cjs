@@ -32,7 +32,9 @@ const pkg = require('../package.json');
  * }]
  */
 const withNitroAssets = (config, props) => {
-  const resolved = resolveProps(props, { bundleIdentifier: config.ios && config.ios.bundleIdentifier });
+  const resolved = resolveProps(props, {
+    bundleIdentifier: config.ios && config.ios.bundleIdentifier,
+  });
   const { backgroundAssets, odr } = resolved.ios;
   const { playAssetDelivery } = resolved.android;
 
@@ -40,7 +42,10 @@ const withNitroAssets = (config, props) => {
     // On the config itself (not only the entitlements mod): expo-native-config reads
     // ios.entitlements to give extension targets the host app's groups.
     config.ios = config.ios || {};
-    config.ios.entitlements = ios.applyAppGroupEntitlement(config.ios.entitlements || {}, backgroundAssets);
+    config.ios.entitlements = ios.applyAppGroupEntitlement(
+      config.ios.entitlements || {},
+      backgroundAssets,
+    );
     config = withInfoPlist(config, (mod) => {
       mod.modResults = ios.applyBackgroundAssetsInfoPlist(mod.modResults, backgroundAssets);
       return mod;

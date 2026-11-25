@@ -122,9 +122,11 @@ describe('createAssets with the memory adapter', () => {
       ...createMemoryAdapter({ packs }),
       getStatus: () => never,
     };
-    await expect(createAssets({ adapter, timeoutMs: 20 }).getStatus('ready')).rejects.toMatchObject({
-      code: 'timeout',
-    });
+    await expect(createAssets({ adapter, timeoutMs: 20 }).getStatus('ready')).rejects.toMatchObject(
+      {
+        code: 'timeout',
+      },
+    );
   });
 });
 
@@ -133,11 +135,14 @@ describe('input checks', () => {
     await expect(client().getStatus(id)).rejects.toMatchObject({ code: 'invalid_argument' });
   });
 
-  it.each(['', '/abs', '../up', 'a/../b', 'a//b', './a', 'a\\b'])('rejects path %j', async (path) => {
-    await expect(client().getFileUrl('ready', path)).rejects.toMatchObject({
-      code: 'invalid_argument',
-    });
-  });
+  it.each(['', '/abs', '../up', 'a/../b', 'a//b', './a', 'a\\b'])(
+    'rejects path %j',
+    async (path) => {
+      await expect(client().getFileUrl('ready', path)).rejects.toMatchObject({
+        code: 'invalid_argument',
+      });
+    },
+  );
 
   it('rejects bad options at creation', () => {
     expect(() => createAssets({ adapter: createMemoryAdapter({ packs }), timeoutMs: 0 })).toThrow(
@@ -148,7 +153,10 @@ describe('input checks', () => {
 
 describe('errors', () => {
   it('parses native error prefixes anywhere in the message', () => {
-    const error = toAssetsError(new Error('Swift error: [nitro-assets:pack_not_found] No pack "x"'), 'x');
+    const error = toAssetsError(
+      new Error('Swift error: [nitro-assets:pack_not_found] No pack "x"'),
+      'x',
+    );
     expect(error).toMatchObject({ code: 'pack_not_found', message: 'No pack "x"', packId: 'x' });
   });
 

@@ -1,1 +1,1 @@
-{"intents": ["greet", "remind", "note"], "note": "A tiny stand-in for a model file."}
+{ "intents": ["greet", "remind", "note"], "note": "A tiny stand-in for a model file." }

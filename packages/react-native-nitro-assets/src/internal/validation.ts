@@ -16,12 +16,16 @@ export function checkPackId(packId: unknown): asserts packId is string {
   }
 }
 
-export function checkRelativePath(relativePath: unknown, packId: string): asserts relativePath is string {
+export function checkRelativePath(
+  relativePath: unknown,
+  packId: string,
+): asserts relativePath is string {
   const fail = (why: string) =>
     new AssetsError('invalid_argument', `Invalid path ${JSON.stringify(relativePath)}: ${why}`, {
       packId,
     });
-  if (typeof relativePath !== 'string' || relativePath.length === 0) throw fail('expected a non-empty string');
+  if (typeof relativePath !== 'string' || relativePath.length === 0)
+    throw fail('expected a non-empty string');
   if (relativePath.startsWith('/')) throw fail('must be relative to the pack root');
   if (relativePath.includes('\\')) throw fail('use "/" as the separator');
   if (relativePath.includes('\0')) throw fail('contains a NUL character');

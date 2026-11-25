@@ -30,7 +30,12 @@ export function createAssets(options: AssetsOptions): AssetsClient {
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   const downloads = createSharedDownloads();
 
-  async function call<T>(what: string, packId: string, body: () => Promise<T>, ms: number | undefined) {
+  async function call<T>(
+    what: string,
+    packId: string,
+    body: () => Promise<T>,
+    ms: number | undefined,
+  ) {
     try {
       return await withDeadline(body(), ms, what, packId);
     } catch (error) {

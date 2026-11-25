@@ -19,8 +19,18 @@ function union(existing, values) {
  * Apple-hosted asset packs"). Apple says to omit every other `BA*` key for Apple hosting.
  */
 function applyBackgroundAssetsInfoPlist(infoPlist, { appGroupId }) {
-  const result = { ...infoPlist, BAAppGroupID: appGroupId, BAHasManagedAssetPacks: true, BAUsesAppleHosting: true };
-  for (const key of ['BAManifestURL', 'BAInitialDownloadRestrictions', 'BAEssentialMaxInstallSize', 'BAMaxInstallSize'])
+  const result = {
+    ...infoPlist,
+    BAAppGroupID: appGroupId,
+    BAHasManagedAssetPacks: true,
+    BAUsesAppleHosting: true,
+  };
+  for (const key of [
+    'BAManifestURL',
+    'BAInitialDownloadRestrictions',
+    'BAEssentialMaxInstallSize',
+    'BAMaxInstallSize',
+  ])
     delete result[key];
   return result;
 }
@@ -37,7 +47,11 @@ function applyOnDemandResourcesInfoPlist(infoPlist) {
 function copyDirectory(from, to) {
   fs.rmSync(to, { recursive: true, force: true });
   fs.mkdirSync(path.dirname(to), { recursive: true });
-  fs.cpSync(from, to, { recursive: true, dereference: true, filter: (source) => path.basename(source) !== '.DS_Store' });
+  fs.cpSync(from, to, {
+    recursive: true,
+    dereference: true,
+    filter: (source) => path.basename(source) !== '.DS_Store',
+  });
 }
 
 /**
@@ -48,7 +62,9 @@ function copyOnDemandResourcePacks({ projectRoot, platformProjectRoot, packs, od
   for (const packId of Object.keys(odr.packs)) {
     const source = path.resolve(projectRoot, packs[packId].path);
     if (!fs.existsSync(source) || !fs.statSync(source).isDirectory())
-      throw new Error(`react-native-nitro-assets: packs["${packId}"].path (${source}) is not a directory`);
+      throw new Error(
+        `react-native-nitro-assets: packs["${packId}"].path (${source}) is not a directory`,
+      );
     copyDirectory(source, path.join(platformProjectRoot, ODR_DIR, packId));
   }
 }
@@ -76,7 +92,13 @@ function applyOnDemandResourcesProject(project, { odr }) {
   );
   if (!groupKey) {
     groupKey = project.generateUuid();
-    objects.PBXGroup[groupKey] = { isa: 'PBXGroup', children: [], name: ODR_DIR, path: ODR_DIR, sourceTree: quote('<group>') };
+    objects.PBXGroup[groupKey] = {
+      isa: 'PBXGroup',
+      children: [],
+      name: ODR_DIR,
+      path: ODR_DIR,
+      sourceTree: quote('<group>'),
+    };
     objects.PBXGroup[`${groupKey}_comment`] = ODR_DIR;
     const mainGroupKey = project.getFirstProject().firstProject.mainGroup;
     objects.PBXGroup[mainGroupKey].children.push({ value: groupKey, comment: ODR_DIR });
@@ -86,7 +108,8 @@ function applyOnDemandResourcesProject(project, { odr }) {
   const resourcesPhaseKey = nativeTarget.buildPhases
     .map((phase) => phase.value)
     .find((key) => objects.PBXResourcesBuildPhase && objects.PBXResourcesBuildPhase[key]);
-  if (!resourcesPhaseKey) throw new Error('react-native-nitro-assets: the app target has no Resources phase');
+  if (!resourcesPhaseKey)
+    throw new Error('react-native-nitro-assets: the app target has no Resources phase');
   const resourcesPhase = objects.PBXResourcesBuildPhase[resourcesPhaseKey];
 
   for (const packId of Object.keys(odr.packs)) {
@@ -119,20 +142,24 @@ function applyOnDemandResourcesProject(project, { odr }) {
   const known = (projectObject.attributes.KnownAssetTags || []).map(unquote);
   projectObject.attributes.KnownAssetTags = union(known, Object.keys(odr.packs)).map(quote);
 
-  const tagsWith = (policy) => Object.keys(odr.packs).filter((packId) => odr.packs[packId] === policy);
-  const configurations = project.pbxXCConfigurationList()[nativeTarget.buildConfigurationList].buildConfigurations;
+  const tagsWith = (policy) =>
+    Object.keys(odr.packs).filter((packId) => odr.packs[packId] === policy);
+  const configurations =
+    project.pbxXCConfigurationList()[nativeTarget.buildConfigurationList].buildConfigurations;
   for (const { value } of configurations) {
     const configuration = project.pbxXCBuildConfigurationSection()[value];
     const settings = configuration.buildSettings;
     settings.ENABLE_ON_DEMAND_RESOURCES = 'YES';
     const initial = tagsWith('initial-install');
     const prefetch = tagsWith('prefetch');
-    if (initial.length) settings.ON_DEMAND_RESOURCES_INITIAL_INSTALL_TAGS = quote(initial.join(' '));
+    if (initial.length)
+      settings.ON_DEMAND_RESOURCES_INITIAL_INSTALL_TAGS = quote(initial.join(' '));
     else delete settings.ON_DEMAND_RESOURCES_INITIAL_INSTALL_TAGS;
     if (prefetch.length) settings.ON_DEMAND_RESOURCES_PREFETCH_ORDER = quote(prefetch.join(' '));
     else delete settings.ON_DEMAND_RESOURCES_PREFETCH_ORDER;
     // Development builds are not served by the App Store: keep the packs inside the app bundle.
-    if (unquote(configuration.name) === 'Debug') settings.EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE = 'YES';
+    if (unquote(configuration.name) === 'Debug')
+      settings.EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE = 'YES';
   }
   return project;
 }

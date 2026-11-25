@@ -34,7 +34,9 @@ function policies(map, allowed, where, sources) {
   for (const [packId, policy] of Object.entries(map)) {
     if (!PACK_ID.test(packId)) fail(`${where}.packs: invalid pack id "${packId}"`);
     if (!allowed.includes(policy))
-      fail(`${where}.packs["${packId}"] must be one of ${allowed.join(', ')} (got ${JSON.stringify(policy)})`);
+      fail(
+        `${where}.packs["${packId}"] must be one of ${allowed.join(', ')} (got ${JSON.stringify(policy)})`,
+      );
     if (sources && !sources[packId])
       fail(`${where}.packs["${packId}"] has no source: add packs["${packId}"].path`);
     result[packId] = policy;
@@ -56,9 +58,12 @@ function resolveProps(props, ios = {}) {
     if (!isObject(input.packs)) fail('packs must map pack ids to { path }');
     for (const [packId, source] of Object.entries(input.packs)) {
       if (!PACK_ID.test(packId))
-        fail(`packs: invalid pack id "${packId}" (a letter, then letters, digits, "-" or "_", at most 64)`);
+        fail(
+          `packs: invalid pack id "${packId}" (a letter, then letters, digits, "-" or "_", at most 64)`,
+        );
       const path = typeof source === 'string' ? source : isObject(source) ? source.path : undefined;
-      if (typeof path !== 'string' || path.length === 0) fail(`packs["${packId}"].path must be a directory`);
+      if (typeof path !== 'string' || path.length === 0)
+        fail(`packs["${packId}"].path must be a directory`);
       packs[packId] = { path };
     }
   }
@@ -70,7 +75,9 @@ function resolveProps(props, ios = {}) {
     const appGroupId =
       ba.appGroupId || (ios.bundleIdentifier ? `group.${ios.bundleIdentifier}` : undefined);
     if (!appGroupId || !/^group\.[A-Za-z0-9.-]+$/.test(appGroupId))
-      fail('ios.backgroundAssets.appGroupId must be "group.<id>" (or set ios.bundleIdentifier for the default)');
+      fail(
+        'ios.backgroundAssets.appGroupId must be "group.<id>" (or set ios.bundleIdentifier for the default)',
+      );
     backgroundAssets = {
       appGroupId,
       // Policies feed `nitro-assets package`; a pack without a source can still be declared here
@@ -83,7 +90,8 @@ function resolveProps(props, ios = {}) {
   let odr;
   if (odrInput) {
     odr = { packs: policies(odrInput.packs, ODR_POLICIES, 'ios.odr', packs) };
-    if (Object.keys(odr.packs).length === 0) fail('ios.odr.packs is empty: name the packs to tag, or set ios.odr to false');
+    if (Object.keys(odr.packs).length === 0)
+      fail('ios.odr.packs is empty: name the packs to tag, or set ios.odr to false');
   }
 
   const inputAndroid = isObject(input.android) ? input.android : {};
@@ -97,13 +105,23 @@ function resolveProps(props, ios = {}) {
     for (const packId of Object.keys(playAssetDelivery.packs)) {
       const name = androidPackName(packId);
       if (names.has(name))
-        fail(`android.playAssetDelivery: "${names.get(name)}" and "${packId}" both become the Android pack "${name}"`);
+        fail(
+          `android.playAssetDelivery: "${names.get(name)}" and "${packId}" both become the Android pack "${name}"`,
+        );
       names.set(name, packId);
     }
-    if (names.size === 0) fail('android.playAssetDelivery.packs is empty: name the packs, or set it to false');
+    if (names.size === 0)
+      fail('android.playAssetDelivery.packs is empty: name the packs, or set it to false');
   }
 
   return { packs, ios: { backgroundAssets, odr }, android: { playAssetDelivery } };
 }
 
-module.exports = { resolveProps, androidPackName, PACK_ID, BA_POLICIES, ODR_POLICIES, PAD_DELIVERY };
+module.exports = {
+  resolveProps,
+  androidPackName,
+  PACK_ID,
+  BA_POLICIES,
+  ODR_POLICIES,
+  PAD_DELIVERY,
+};

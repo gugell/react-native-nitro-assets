@@ -14,7 +14,11 @@ export function createClient(choice: AdapterChoice): AssetsClient {
     return createAssets({
       adapter: createMemoryAdapter({
         packs: {
-          [DEMO_PACK]: { files: [DEMO_FILE, 'README.txt'], downloadSizeBytes: 2_048, downloadDurationMs: 2_000 },
+          [DEMO_PACK]: {
+            files: [DEMO_FILE, 'README.txt'],
+            downloadSizeBytes: 2_048,
+            downloadDurationMs: 2_000,
+          },
         },
       }),
     });
