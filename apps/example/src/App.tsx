@@ -1,8 +1,9 @@
 import { StatusBar } from 'expo-status-bar';
-import { useCallback, useMemo, useState } from 'react';
-import { Button, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Button, Linking, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { AssetsError, type AssetPackStatus } from 'react-native-nitro-assets';
 import { createClient, DEMO_FILE, DEMO_PACK, type AdapterChoice } from './assets';
+import { runDeviceTests, type TestResult } from './deviceTests';
 
 function describe(error: unknown): string {
   if (error instanceof AssetsError) return `${error.code}: ${error.message}`;
@@ -17,7 +18,32 @@ export function App() {
   const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [log, setLog] = useState<string[]>([]);
 
-  const append = useCallback((line: string) => setLog((lines) => [line, ...lines].slice(0, 20)), []);
+  const append = useCallback(
+    (line: string) => setLog((lines) => [line, ...lines].slice(0, 20)),
+    [],
+  );
+
+  const [tests, setTests] = useState<TestResult[] | null>(null);
+  const [testsRunning, setTestsRunning] = useState(false);
+  const runTests = useCallback(async () => {
+    setTests([]);
+    setTestsRunning(true);
+    try {
+      await runDeviceTests((result) => setTests((done) => [...(done ?? []), result]));
+    } finally {
+      setTestsRunning(false);
+    }
+  }, []);
+
+  // `<scheme>://run-tests` runs the device tests on launch (xcrun devicectl ... --payload-url).
+  useEffect(() => {
+    const maybeRun = (url: string | null | undefined) => {
+      if (url?.includes('run-tests')) runTests().catch(console.error);
+    };
+    Linking.getInitialURL().then(maybeRun).catch(console.error);
+    const subscription = Linking.addEventListener('url', ({ url }) => maybeRun(url));
+    return () => subscription.remove();
+  }, [runTests]);
 
   const run = useCallback(
     (label: string, body: () => Promise<void>) => async () => {
@@ -35,7 +61,8 @@ export function App() {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>react-native-nitro-assets</Text>
       <Text>
-        Adapter: {assets.adapter} · backend: {assets.backend} · supported: {String(assets.isSupported)}
+        Adapter: {assets.adapter} · backend: {assets.backend} · supported:{' '}
+        {String(assets.isSupported)}
       </Text>
       <View style={styles.row}>
         <Button title="Native" onPress={() => setChoice('native')} disabled={choice === 'native'} />
@@ -43,8 +70,13 @@ export function App() {
       </View>
 
       <Text style={styles.section}>Pack “{DEMO_PACK}”</Text>
-      <Text>State: {status ? `${status.state}${status.isUpdateAvailable ? ' (update available)' : ''}` : '—'}</Text>
-      <Text>Size: {status?.downloadSizeBytes !== undefined ? `${status.downloadSizeBytes} bytes` : '—'}</Text>
+      <Text>
+        State:{' '}
+        {status ? `${status.state}${status.isUpdateAvailable ? ' (update available)' : ''}` : '—'}
+      </Text>
+      <Text>
+        Size: {status?.downloadSizeBytes !== undefined ? `${status.downloadSizeBytes} bytes` : '—'}
+      </Text>
       <Text>Progress: {progress === null ? '—' : `${Math.round(progress * 100)} %`}</Text>
       <Text selectable>File: {fileUrl ?? '—'}</Text>
 
@@ -63,7 +95,9 @@ export function App() {
         />
         <Button
           title="3. Get file URL"
-          onPress={run('getFileUrl', async () => setFileUrl(await assets.getFileUrl(DEMO_PACK, DEMO_FILE)))}
+          onPress={run('getFileUrl', async () =>
+            setFileUrl(await assets.getFileUrl(DEMO_PACK, DEMO_FILE)),
+          )}
         />
         <Button
           title="4. Remove"
@@ -75,6 +109,26 @@ export function App() {
           })}
         />
       </View>
+
+      <Text style={styles.section}>Device tests</Text>
+      <Button
+        title={testsRunning ? 'Running…' : 'Run device tests'}
+        onPress={runTests}
+        disabled={testsRunning}
+      />
+      {tests && (
+        <Text>
+          {tests.filter((t) => t.passed).length} passed · {tests.filter((t) => !t.passed).length}{' '}
+          failed
+          {testsRunning ? ' · running' : ''}
+        </Text>
+      )}
+      {tests?.map((t) => (
+        <Text key={t.name} style={styles.log}>
+          {t.passed ? '✓' : '✗'} {t.name}
+          {t.detail ? `\n    ${t.detail}` : ''}
+        </Text>
+      ))}
 
       <Text style={styles.section}>Log</Text>
       {log.map((line, index) => (
