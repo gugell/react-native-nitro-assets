@@ -21,3 +21,4 @@ asset-packs-out/
 *.p8
 .env
 .env.*
+apps/*/.ba-dev-certs/
