@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.0](https://github.com/gugell/react-native-nitro-assets/compare/v0.1.0...v0.2.0) (2026-11-25)
+
+### Bug Fixes
+
+* **release:** pass the rehearsal when there is nothing to release ([33c844c](https://github.com/gugell/react-native-nitro-assets/commit/33c844cc1df6f959f0615313fc824d24ad8bb566))
+
 ## 0.1.0 (2026-11-25)
 
 ### Features
