@@ -17,7 +17,7 @@
     },
     "apps/example": {
       "name": "react-native-nitro-assets-example",
-      "version": "0.0.0",
+      "version": "0.1.0",
       "dependencies": {
         "expo": "~58.0.26",
         "expo-file-system": "~58.0.14",
@@ -36,7 +36,7 @@
     },
     "packages/react-native-nitro-assets": {
       "name": "react-native-nitro-assets",
-      "version": "0.0.0",
+      "version": "0.1.0",
       "bin": {
         "nitro-assets": "./bin/nitro-assets.mjs",
       },
