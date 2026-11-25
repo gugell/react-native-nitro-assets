@@ -58,11 +58,15 @@ final class BackgroundAssetsBackend: AssetPackBackend {
     }
     do {
       // All packs share one namespace; the nitro-assets CLI packages each pack under "<packId>/".
-      let url = try manager.url(for: FilePath("\(packId)/\(relativePath)"))
-      guard FileManager.default.fileExists(atPath: url.path) else {
-        throw AssetsFailure(.fileNotFound, "Asset pack \"\(packId)\" has no file \"\(relativePath)\"")
+      if let url = try? manager.url(for: FilePath("\(packId)/\(relativePath)")), FileManager.default.fileExists(atPath: url.path) {
+        return url.absoluteString
       }
-      return url.absoluteString
+      // A pack built by hand often lists its files at the archive root. They download, but sit
+      // outside "<packId>/", where nothing would find them; say so instead of "no such file".
+      if let url = try? manager.url(for: FilePath(relativePath)), FileManager.default.fileExists(atPath: url.path) {
+        throw AssetsFailure(.misconfigured, "Asset pack \"\(packId)\" has \"\(relativePath)\" at the archive root instead of under \"\(packId)/\": rebuild it with `npx nitro-assets package` (or a { \"directory\": \"\(packId)\" } file selector) and upload it again")
+      }
+      throw AssetsFailure(.fileNotFound, "Asset pack \"\(packId)\" has no file \"\(relativePath)\"")
     } catch {
       throw AssetsFailure.fromBackgroundAssets(error, packId: packId)
     }

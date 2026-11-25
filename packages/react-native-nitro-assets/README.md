@@ -115,6 +115,8 @@ npx nitro-assets package intent-model     # or some of them
 
 writes `asset-packs-out/<packId>.aar` (macOS, Xcode 26). Each archive holds the pack's files under `<packId>/` and a manifest with its download policy. Add `asset-packs-out/` to `.gitignore`.
 
+Apple-hosted packs share one namespace on the device, so the module reads a pack's files from `<packId>/`. If you build an archive yourself with `xcrun ba-package`, select the folder rather than its files — `"fileSelectors": [{ "directory": "intent-model" }]` run from the folder's parent — or `getFileUrl` reports `misconfigured`: the files downloaded, but at the archive root.
+
 Upload each archive to the app's record in App Store Connect, with Transporter (drag the `.aar` in, choose the app, Deliver) or:
 
 ```sh
